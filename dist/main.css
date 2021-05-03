@@ -1,7 +1,7 @@
 .button {
-  h1 {
-    font-size: large;
-  }
   color: red;
   height: 20px;
+}
+.button h1 {
+  font-size: large;
 }

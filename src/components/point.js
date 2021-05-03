@@ -1,3 +1,4 @@
-import "./style.scss";
-import html from "./file.html";
-import controller from "./controller.js";
+import * as style from "./style.scss";
+import controller from "./controller";
+
+export { controller, style };

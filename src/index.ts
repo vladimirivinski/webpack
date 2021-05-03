@@ -1,1 +1,3 @@
-import * as comp from "./components/point.js";
+import * as contr from "./components/point";
+
+contr.controller();
