@@ -11,11 +11,13 @@ const isDev = process.env.NODE_ENV === "development";
 const isProd = !isDev;
 // npm i -D cross-env
 
+const filename = (ext) => (isDev ? `[name].${ext}` : `[name].[hash].${ext}`);
+
 module.exports = {
   entry: "./index.ts",
 
   output: {
-    filename: "[name].[contexthash].js",
+    filename: filename("js"),
     path: path.resolve(__dirname, "dist"),
   },
 
@@ -29,7 +31,7 @@ module.exports = {
   },
 
   // Control how source maps are generated
-  devtool: "inline-source-map",
+  devtool: isDev ? "source-map" : "inline-source-map",
 
   devServer: {
     contentBase: path.resolve(__dirname, "dist"),
@@ -41,26 +43,34 @@ module.exports = {
 
   context: path.resolve(__dirname, "src"),
 
+  optimization: {
+    minimize: isProd,
+    minimizer: [new TerserPlugin()],
+  },
   module: {
     rules: [
       {
-        test: /\.tsx?$/,
+        test: /\.ts?$/,
         use: "ts-loader",
         exclude: /node_modules/,
       },
       // {
       //   test: /\.html$/,
-      //   use: [
-      //     {
-      //       loader: "html-loader",
-      //     },
-      //   ],
+      //   use: ["html-loader"],
       // },
       {
         // to auto refresh index.html and other html
         test: /\.html$/,
         loader: "raw-loader",
         exclude: /node_modules/,
+      },
+
+      {
+        test: /\.(js|jsx)$/,
+        exclude: /node_modules/,
+        use: {
+          loader: "babel-loader",
+        },
       },
 
       {
@@ -84,13 +94,16 @@ module.exports = {
     // HTML
     new HtmlWebpackPlugin({
       minify: {
-        filename: "[name].[contenthash].html", // output file
+        filename: filename("html"), // output file
         collapseWhitespace: isProd,
       },
     }),
     // Очистка dist
     new CleanWebpackPlugin(),
-    new MiniCssExtractPlugin(),
+    new MiniCssExtractPlugin({
+      filename: filename("css"),
+    }),
+
     new webpack.HotModuleReplacementPlugin(),
   ],
 };
