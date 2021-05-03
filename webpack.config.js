@@ -7,17 +7,15 @@ const CssMinimizerPlugin = require("css-minimizer-webpack-plugin");
 const path = require("path");
 const webpack = require("webpack");
 
-const fs = require("fs");
-
 const isDev = process.env.NODE_ENV === "development";
 const isProd = !isDev;
-// npm i -D cross-nev
+// npm i -D cross-env
 
 module.exports = {
   entry: "./index.ts",
 
   output: {
-    filename: "bundle.js",
+    filename: "[name].[contexthash].js",
     path: path.resolve(__dirname, "dist"),
   },
 
@@ -31,6 +29,7 @@ module.exports = {
   },
 
   // Control how source maps are generated
+  devtool: "inline-source-map",
 
   devServer: {
     contentBase: path.resolve(__dirname, "dist"),
@@ -49,34 +48,31 @@ module.exports = {
         use: "ts-loader",
         exclude: /node_modules/,
       },
+      // {
+      //   test: /\.html$/,
+      //   use: [
+      //     {
+      //       loader: "html-loader",
+      //     },
+      //   ],
+      // },
       {
-        test: /\.html$/i,
-        loader: "html-loader",
+        // to auto refresh index.html and other html
+        test: /\.html$/,
+        loader: "raw-loader",
+        exclude: /node_modules/,
       },
-      {
-        test: /\.txt|html$/,
-        use: "raw-loader",
-      },
+
       {
         test: /\.js$/,
         enforce: "pre",
         use: ["source-map-loader"],
       },
       {
-        test: /\.css$/i,
+        test: /\.s[ac]ss|css$/i,
         use: [
-          {
-            loader: MiniCssExtractPlugin.loader,
-          },
-          "css-loader",
-        ],
-      },
-      {
-        test: /\.scss$/i,
-        use: [
-          {
-            loader: MiniCssExtractPlugin.loader,
-          },
+          // fallback to style-loader in development
+          process.env.NODE_ENV === isDev ? "style-loader" : MiniCssExtractPlugin.loader,
           "css-loader",
           "sass-loader",
         ],
@@ -88,8 +84,7 @@ module.exports = {
     // HTML
     new HtmlWebpackPlugin({
       minify: {
-        filename: "index.html", // output file
-
+        filename: "[name].[contenthash].html", // output file
         collapseWhitespace: isProd,
       },
     }),
